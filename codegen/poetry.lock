@@ -1,4 +1,28 @@
 [[package]]
+name = "accelerate"
+version = "0.12.0"
+description = "Accelerate"
+category = "main"
+optional = false
+python-versions = ">=3.7.0"
+
+[package.dependencies]
+numpy = ">=1.17"
+packaging = ">=20.0"
+psutil = "*"
+pyyaml = "*"
+torch = ">=1.4.0"
+
+[package.extras]
+testing = ["tqdm", "deepspeed (<0.7.0)", "sklearn", "scipy", "transformers", "evaluate", "datasets", "parameterized", "pytest-subtests", "pytest-xdist", "pytest"]
+test_trackers = ["tensorboard", "comet-ml", "wandb"]
+test_prod = ["parameterized", "pytest-subtests", "pytest-xdist", "pytest"]
+test_dev = ["tqdm", "deepspeed (<0.7.0)", "sklearn", "scipy", "transformers", "evaluate", "datasets"]
+sagemaker = ["sagemaker"]
+quality = ["hf-doc-builder (>=0.3.0)", "flake8 (>=3.8.3)", "isort (>=5.5.4)", "black (>=22.0,<23.0)"]
+dev = ["tqdm", "deepspeed (<0.7.0)", "sklearn", "scipy", "transformers", "evaluate", "datasets", "parameterized", "pytest-subtests", "pytest-xdist", "pytest", "hf-doc-builder (>=0.3.0)", "flake8 (>=3.8.3)", "isort (>=5.5.4)", "black (>=22.0,<23.0)"]
+
+[[package]]
 name = "appnope"
 version = "0.1.3"
 description = "Disable App Nap on macOS >= 10.9"
@@ -95,6 +119,14 @@ soupsieve = ">1.2"
 [package.extras]
 html5lib = ["html5lib"]
 lxml = ["lxml"]
+
+[[package]]
+name = "bitsandbytes"
+version = "0.32.1"
+description = "8-bit optimizers and matrix multiplication routines."
+category = "main"
+optional = false
+python-versions = "*"
 
 [[package]]
 name = "bleach"
@@ -1107,6 +1139,14 @@ objc = ["pyobjc-framework-cocoa"]
 win32 = ["pywin32"]
 
 [[package]]
+name = "sentencepiece"
+version = "0.1.97"
+description = "SentencePiece python wrapper"
+category = "main"
+optional = false
+python-versions = "*"
+
+[[package]]
 name = "setuptools-scm"
 version = "6.4.2"
 description = "the blessed package to manage your versions by scm tags"
@@ -1408,9 +1448,10 @@ testing = ["pytest (>=6)", "pytest-checkdocs (>=2.4)", "pytest-flake8", "pytest-
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.8"
-content-hash = "f10c4ee75a01856f57cfed0bc63964db8f08419f4027d2675ca2eb310e02582a"
+content-hash = "374edc3012eb7a59de5ba6404e09e3ee1b02fb6b3a08ce892e4cd7485ccdd506"
 
 [metadata.files]
+accelerate = []
 appnope = []
 argon2-cffi = []
 argon2-cffi-bindings = []
@@ -1419,6 +1460,7 @@ atomicwrites = []
 attrs = []
 backcall = []
 beautifulsoup4 = []
+bitsandbytes = []
 bleach = []
 certifi = [
     {file = "certifi-2022.6.15-py3-none-any.whl", hash = "sha256:fe86415d55e84719d75f8b69414f6438ac3547d2078ab91b67e779ef69378412"},
@@ -1509,6 +1551,7 @@ requests = [
     {file = "requests-2.28.1.tar.gz", hash = "sha256:7c5599b102feddaa661c826c56ab4fee28bfd17f5abca1ebbe3e7f19d7c97983"},
 ]
 send2trash = []
+sentencepiece = []
 setuptools-scm = []
 six = []
 soupsieve = []

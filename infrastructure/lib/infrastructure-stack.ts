@@ -55,8 +55,8 @@ export class InfrastructureStack extends cdk.Stack {
 
     const asg = new autoscaling.AutoScalingGroup(this, 'CodegenASG', {
       vpc,
-      // instanceType: ec2.InstanceType.of(ec2.InstanceClass.P2, ec2.InstanceSize.XLARGE),
-      instanceType: ec2.InstanceType.of(ec2.InstanceClass.T2, ec2.InstanceSize.MEDIUM),
+      instanceType: ec2.InstanceType.of(ec2.InstanceClass.P3, ec2.InstanceSize.XLARGE2),
+      // instanceType: ec2.InstanceType.of(ec2.InstanceClass.T2, ec2.InstanceSize.XLARGE2),
       machineImage: new MachineImageConverter(ami),
       securityGroup: securityGroup,
       role: role,
@@ -86,13 +86,7 @@ export class InfrastructureStack extends cdk.Stack {
       bucket: asset.bucket,
       bucketKey: asset.s3ObjectKey,
     });
-
-    // asg.addUserData(dockerAsset);
-
-    asg.userData.addExecuteFileCommand({
-      filePath: localPath,
-      arguments: 'poetry install && poetry shell && poetry run python -m codegen.server'
-    });
+    asg.userData.addCommands(`cd ${localPath} && poetry install && poetry shell && poetry run python -m codegen.server`);
     asset.grantRead(role);
 
     new s3.Bucket(this, 'salesforce-codegen-models', {

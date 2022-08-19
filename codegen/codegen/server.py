@@ -9,8 +9,8 @@ def handle_post():
 
     if request.method == 'POST':
         text = request.form['input']
-        tokenizer = AutoTokenizer.from_pretrained("Salesforce/codegen-350M-multi")
-        model = AutoModelForCausalLM.from_pretrained("Salesforce/codegen-350M-multi")
+        tokenizer = AutoTokenizer.from_pretrained("Salesforce/codegen-16B-multi")
+        model = AutoModelForCausalLM.from_pretrained("Salesforce/codegen-16B-multi", load_in_8bit=True)
         input_ids = tokenizer(text, return_tensors="pt").input_ids
         generated_ids = model.generate(input_ids, max_length=128)
         output = tokenizer.decode(generated_ids[0], skip_special_tokens=True)
