@@ -10,11 +10,21 @@ def handle_post():
     if request.method == 'POST':
         text = request.form['input']
         tokenizer = AutoTokenizer.from_pretrained("Salesforce/codegen-16B-multi")
-        model = AutoModelForCausalLM.from_pretrained("Salesforce/codegen-16B-multi", load_in_8bit=True)
-        input_ids = tokenizer(text, return_tensors="pt").input_ids
-        generated_ids = model.generate(input_ids, max_length=128)
+        model = AutoModelForCausalLM.from_pretrained("Salesforce/codegen-16B-multi",
+                                    device_map="auto", 
+                                    load_in_8bit=True)
+        model.eval()
+        model.to('cuda') 
+
+        tokenized = tokenizer(text, return_tensors="pt")
+        input_ids = tokenized.input_ids.to('cuda')
+        attention_mask = tokenized.attention_mask.to('cuda')
+
+        generated_ids = model.generate(input_ids, 
+                                    attention_mask=attention_mask, 
+                                    temperature=0.,  
+                                    max_length=528)
         output = tokenizer.decode(generated_ids[0], skip_special_tokens=True)
-        print(output)
         return render_template('codegen.html', input=text, output=output)
     
     return render_template('codegen.html', input='', output='')

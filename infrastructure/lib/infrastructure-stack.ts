@@ -55,8 +55,8 @@ export class InfrastructureStack extends cdk.Stack {
 
     const asg = new autoscaling.AutoScalingGroup(this, 'CodegenASG', {
       vpc,
+      // instanceType: ec2.InstanceType.of(ec2.InstanceClass.T2, ec2.InstanceSize.MICRO),
       instanceType: ec2.InstanceType.of(ec2.InstanceClass.P3, ec2.InstanceSize.XLARGE2),
-      // instanceType: ec2.InstanceType.of(ec2.InstanceClass.T2, ec2.InstanceSize.XLARGE2),
       machineImage: new MachineImageConverter(ami),
       securityGroup: securityGroup,
       role: role,
@@ -86,7 +86,21 @@ export class InfrastructureStack extends cdk.Stack {
       bucket: asset.bucket,
       bucketKey: asset.s3ObjectKey,
     });
-    asg.userData.addCommands(`cd ${localPath} && poetry install && poetry shell && poetry run python -m codegen.server`);
+
+    //  todo: check permissions chmod
+    asg.userData.addCommands(
+      'sudo yum -y install openssl-devel bzip2-devel libffi-devel xz-devel',
+      'sudo yum -y install wget && wget https://www.python.org/ftp/python/3.8.5/Python-3.8.5.tgz && tar xvf Python-3.8.5.tgz && cd Python-3.8.5 && ./configure  --enable-optimizations && make && make install && cd .. ',
+
+      'yum install unzip',
+      `unzip ${localPath} -d codegen && cd codegen`,
+      'pip3 install poetry',
+      'poetry config virtualenvs.create true',
+      'poetry install --no-dev',
+      'poetry shell',
+      'git+https://github.com/huggingface/transformers.git',
+      'cd codegen && python server.py',
+    );
     asset.grantRead(role);
 
     new s3.Bucket(this, 'salesforce-codegen-models', {
