@@ -1,9 +1,9 @@
 <form method="post">
-    <textarea rows = "40" cols = "88" name = "input">
-        {{ input }}
-    </textarea>
-    <textarea rows = "40" cols = "88" name = "output">
-        {{ output }}
-    </textarea>
+    <label for="fname">Number of tokens</label><br>
+    <textarea rows = "1" cols = "10" name = "fname">{{fname}}</textarea><br>
+    <textarea rows = "40" cols = "60" name = "input">{{input}}</textarea>
+    <textarea rows = "40" cols = "60" name = "output">{{ output }}</textarea><br>
+    <label for="fname">Elapesed time:</label><br>
+    <output type="text" name="elapsed" for="0">{{ elapsed }}</output>
     <p><input type=submit value=Generate>
 </form>

@@ -53,14 +53,24 @@ export class InfrastructureStack extends cdk.Stack {
       userData: ec2.UserData.forLinux()
     };
 
+    const rootVolume: autoscaling.BlockDevice = {
+      deviceName: '/dev/xvda', // Use the root device name from Step 1
+      volume: autoscaling.BlockDeviceVolume.ebs(200), // Override the volume size in Gibibytes (GiB)
+    };
+
+
     const asg = new autoscaling.AutoScalingGroup(this, 'CodegenASG', {
       vpc,
       // instanceType: ec2.InstanceType.of(ec2.InstanceClass.T2, ec2.InstanceSize.MICRO),
-      instanceType: ec2.InstanceType.of(ec2.InstanceClass.P3, ec2.InstanceSize.XLARGE2),
+      instanceType: ec2.InstanceType.of(ec2.InstanceClass.G4DN, ec2.InstanceSize.XLARGE2),
       machineImage: new MachineImageConverter(ami),
       securityGroup: securityGroup,
       role: role,
       keyName: 'codegen-kate',
+      blockDevices: [rootVolume],
+      minCapacity: 0,
+      maxCapacity: 0,
+      desiredCapacity: 0
     });
 
     const lb = new elbv2.ApplicationLoadBalancer(this, 'LB', {
@@ -82,26 +92,19 @@ export class InfrastructureStack extends cdk.Stack {
 
     // Create an asset that will be used as part of User Data to run on first load
     const asset = new Asset(this, 'CodegenAsset', { path: path.join(__dirname, '../../codegen') });
+    asset.grantRead(role);
+    asset.bucket.grantRead(role);
     const localPath = asg.userData.addS3DownloadCommand({
       bucket: asset.bucket,
       bucketKey: asset.s3ObjectKey,
     });
 
-    //  todo: check permissions chmod
     asg.userData.addCommands(
-      'sudo yum -y install openssl-devel bzip2-devel libffi-devel xz-devel',
-      'sudo yum -y install wget && wget https://www.python.org/ftp/python/3.8.5/Python-3.8.5.tgz && tar xvf Python-3.8.5.tgz && cd Python-3.8.5 && ./configure  --enable-optimizations && make && make install && cd .. ',
-
-      'yum install unzip',
       `unzip ${localPath} -d codegen && cd codegen`,
-      'pip3 install poetry',
-      'poetry config virtualenvs.create true',
-      'poetry install --no-dev',
-      'poetry shell',
-      'git+https://github.com/huggingface/transformers.git',
-      'cd codegen && python server.py',
+      'pip3 install accelerate bitsandbytes git+https://github.com/huggingface/transformers.git flask uwsgi',
+      'sudo chmod -R g+w /root/codegen',
+      'cd codegen && uwsgi --ini uwsgi.ini',
     );
-    asset.grantRead(role);
 
     new s3.Bucket(this, 'salesforce-codegen-models', {
       versioned: false,
