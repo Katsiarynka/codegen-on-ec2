@@ -61,12 +61,13 @@ export class InfrastructureStack extends cdk.Stack {
 
     const asg = new autoscaling.AutoScalingGroup(this, 'CodegenASG', {
       vpc,
+      // for cheap testing use that confs
       // instanceType: ec2.InstanceType.of(ec2.InstanceClass.T2, ec2.InstanceSize.MICRO),
       instanceType: ec2.InstanceType.of(ec2.InstanceClass.G4DN, ec2.InstanceSize.XLARGE2),
       machineImage: new MachineImageConverter(ami),
       securityGroup: securityGroup,
       role: role,
-      keyName: 'codegen-kate',
+      keyName: 'codegen-kate', // TODO: update on dynamic key
       blockDevices: [rootVolume],
       minCapacity: 0,
       maxCapacity: 0,
@@ -101,14 +102,12 @@ export class InfrastructureStack extends cdk.Stack {
 
     asg.userData.addCommands(
       `unzip ${localPath} -d codegen && cd codegen`,
-      'pip3 install accelerate bitsandbytes git+https://github.com/huggingface/transformers.git flask uwsgi',
       'sudo chmod -R g+w /root/codegen',
+      // python and dependencies installation
+      'curl -sSL https://install.python-poetry.org | python3 -',
+      'poetry install --no-dev',
+      'pip3 install accelerate bitsandbytes git+https://github.com/huggingface/transformers.git',
       'cd codegen && uwsgi --ini uwsgi.ini',
     );
-
-    new s3.Bucket(this, 'salesforce-codegen-models', {
-      versioned: false,
-      removalPolicy: cdk.RemovalPolicy.DESTROY
-    });
   }
 }
